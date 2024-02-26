@@ -12,3 +12,8 @@ scrape_configs:
       format: ['prometheus']
     static_configs:
       - targets: ['netdata:19999']
+
+  - job_name: 'tezos-node'
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ['node:9091']
