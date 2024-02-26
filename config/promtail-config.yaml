@@ -12,35 +12,31 @@ scrape_configs:
   # Collecte des logs système
   - job_name: system
     static_configs:
-      - targets:
-          - localhost
+      - targets: ['localhost']
         labels:
           job: varlogs
           __path__: /var/log/*log
-  
+
   # Collecte des logs du noeud Tezos
-  - job_name: tezos-node
+  - job_name: octez-node
     static_configs:
-      - targets:
-          - localhost
+      - targets: ['localhost']
         labels:
-          job: tezos-node
+          job: octez-node
           __path__: /var/log/tezos/tezos.log
-  
+
   # Collecte des logs du service baker
-  - job_name: tezos-baker
+  - job_name: octez-baker
     static_configs:
-      - targets:
-          - localhost
+      - targets: ['localhost']
         labels:
-          job: tezos-baker
+          job: octez-baker
           __path__: /var/log/tezos/baker.log
-  
+
   # Collecte des logs du service accuser
-  - job_name: tezos-accuser
+  - job_name: octez-accuser
     static_configs:
-      - targets:
-          - localhost
+      - targets: ['localhost']
         labels:
-          job: tezos-accuser
+          job: octez-accuser
           __path__: /var/log/tezos/accuser.log

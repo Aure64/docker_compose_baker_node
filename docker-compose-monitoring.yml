@@ -13,51 +13,31 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - app_network
+      app_network:
+        aliases:
+          - prometheus
+
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     volumes:
       - grafana-storage:/var/lib/grafana
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     environment:
       GF_SECURITY_ADMIN_PASSWORD: secret  # Change this!
       GF_PATHS_PROVISIONING: "/etc/grafana/provisioning"
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
-      GRAFANA_DATASOURCES: |
-        apiVersion: 1
-        datasources:
-        - name: Loki
-          type: loki
-          access: proxy
-          orgId: 1
-          url: http://loki:3100
-          basicAuth: false
-          isDefault: false
-          editable: false
-        - name: Prometheus
-          type: prometheus
-          access: proxy
-          orgId: 1
-          url: http://prometheus:9090
-          basicAuth: false
-          isDefault: true
-          editable: true
-
-    entrypoint:
-      - sh
-      - -c
-      - |
-        mkdir -p /etc/grafana/provisioning/datasources
-        echo "$$GRAFANA_DATASOURCES" > /etc/grafana/provisioning/datasources/datasources.yaml
-        /run.sh
     ports:
       - "3000:3000"
     depends_on:
       - prometheus
     networks:
-      - app_network
+      app_network:
+        aliases:
+          - grafana
 
   loki:
     image: grafana/loki:latest
@@ -91,18 +71,20 @@ services:
     security_opt:
       - apparmor:unconfined
     volumes:
+      - ./config/netdata/app_groups.conf:/etc/netdata/app_groups.conf:ro
+      - ./config/netdata/filecheck.conf:/etc/netdata/go.d/filecheck.conf:ro
       - netdataconfig:/etc/netdata
       - netdatalib:/var/lib/netdata
       - netdatacache:/var/cache/netdata
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /var/log:/host/var/log:ro
+      - ./node_data:/host/node_data:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - "19999:19999"
     networks:
       - app_network
-
 volumes:
   grafana-storage: {}
   netdataconfig: {}
