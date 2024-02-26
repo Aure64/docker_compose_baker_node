@@ -1,0 +1,46 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Collecte des logs système
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: varlogs
+          __path__: /var/log/*log
+  
+  # Collecte des logs du noeud Tezos
+  - job_name: tezos-node
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: tezos-node
+          __path__: /var/log/tezos/tezos.log
+  
+  # Collecte des logs du service baker
+  - job_name: tezos-baker
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: tezos-baker
+          __path__: /var/log/tezos/baker.log
+  
+  # Collecte des logs du service accuser
+  - job_name: tezos-accuser
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: tezos-accuser
+          __path__: /var/log/tezos/accuser.log
