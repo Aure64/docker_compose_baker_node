@@ -13,13 +13,13 @@ services:
     volumes:
       - ./node_data:/var/run/tezos/node
       - ./client_data:/var/run/tezos/client
-      - /home/tezos/tezos_node_baking/snapshot.rolling:/snapshot
+      - ./snapshot.rolling:/snapshot
 
 
   node:
     container_name: tezos-public-node
     image: tezos/tezos:master
-    command: octez-node --network=ghostnet --net-addr :9732 --rpc-addr 0.0.0.0:8732 --allow-all-rpc 0.0.0.0:8732 --history-mode=rolling --metrics-addr=:9091 --log-output /var/log/tezos/tezos.log
+    command: octez-node --network=ghostnet --net-addr :9732 --rpc-addr 0.0.0.0:8732 --allow-all-rpc 0.0.0.0:8732 --history-mode=rolling --metrics-addr=0.0.0.0:9091 --log-output /var/log/tezos/tezos.log
     ports:
       - '9732:9732'
       - '8732:8732'
@@ -30,7 +30,9 @@ services:
       - ./logs:/var/log/tezos
     restart: on-failure
     networks:
-      - app_network
+      app_network:
+        aliases:
+          - node
 
   baker:
     container_name: octez-baker
