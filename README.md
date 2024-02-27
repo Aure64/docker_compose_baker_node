@@ -32,7 +32,8 @@ Arrêtez le conteneur du nœud Tezos, puis nettoyez les données obsolètes avan
 
 ```
 docker compose -f docker-compose/tezos.yml stop node
-sudo rm -rf ./data/node_data/data/*
+sudo rm -rf ./data/node_data/data/daily_logs ./data/node_data/data/lock ./data/node_data/data/store ./data/node_data/data/context
+
 ```
 
 ### Étape 4: Télécharger la Snapshot
