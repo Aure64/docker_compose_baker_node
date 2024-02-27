@@ -1,11 +1,15 @@
-.PHONY: create-network launch-node clean-node-data download-snapshot import-snapshot restart-node launch-monitoring clean-volumes clean-images clean-all
+.PHONY: create-network launch-node clean-node-data download-snapshot import-snapshot restart-node launch-monitoring stop clean-volumes clean-images clean-all
 
 # Nom du réseau Docker
 NETWORK_NAME=app_network
-# URL de la snapshot
-SNAPSHOT_URL=https://snapshots.eu.tzinit.org/ghostnet/rolling
-# Chemin local de la snapshot
-SNAPSHOT_FILE=./data/snapshot.rolling
+
+# Lire les variables d'environnement
+-include .env
+export
+
+# Construire l'URL du snapshot en fonction des variables TEZOS_NETWORK et TEZOS_HISTORY_MODE
+SNAPSHOT_BASE_URL=https://snapshots.eu.tzinit.org
+SNAPSHOT_URL=$(SNAPSHOT_BASE_URL)/$(TEZOS_NETWORK)/$(TEZOS_HISTORY_MODE)
 
 # Créer le réseau Docker s'il n'existe pas
 create-network:
@@ -22,7 +26,7 @@ clean-node-data:
 
 # Télécharger la dernière snapshot
 download-snapshot:
-	wget -O $(SNAPSHOT_FILE) $(SNAPSHOT_URL)
+	wget -O ./data/snapshot.rolling $(SNAPSHOT_URL)
 
 # Importer la snapshot dans le volume du nœud Tezos
 import-snapshot: download-snapshot
@@ -36,18 +40,24 @@ restart-node:
 launch-monitoring:
 	docker compose -f docker-compose/monitoring.yml up -d
 
-# Nettoyer tous les volumes Docker non utilisés
-clean-volumes:
-	docker volume prune -f
+# Arrêter tous les conteneurs
+stop:
+	docker compose -f docker-compose/tezos.yml down
+	docker compose -f docker-compose/monitoring.yml down
 
+clean-volumes:
+	docker volume rm docker-compose_grafana-storage docker-compose_loki-data docker-compose_netdatacache docker-compose_netdataconfig docker-compose_netdatalib || true
+	
 # Nettoyer toutes les images Docker non utilisées
 clean-images:
 	docker image prune -a -f
 
+
+	
+
 # Nettoyer tout : conteneurs, volumes et images
-clean-all: clean-node-data clean-volumes clean-images
+clean-all: stop clean-volumes clean-images
 	@echo "Nettoyage complet effectué."
 
 # Cible par défaut pour lancer l'ensemble du processus
 all: create-network launch-node clean-node-data import-snapshot restart-node launch-monitoring
-

@@ -19,7 +19,7 @@ services:
   node:
     container_name: tezos-public-node
     image: tezos/tezos:master
-    command: octez-node --network=ghostnet --net-addr :9732 --rpc-addr 0.0.0.0:8732 --allow-all-rpc 0.0.0.0:8732 --history-mode=rolling --metrics-addr=0.0.0.0:9091 --log-output /var/log/tezos/tezos.log
+    command: octez-node --network=${TEZOS_NETWORK} --net-addr :9732 --rpc-addr 0.0.0.0:8732 --allow-all-rpc 0.0.0.0:8732 --history-mode=${TEZOS_HISTORY_MODE} --metrics-addr=0.0.0.0:9091 --log-output /var/log/tezos/tezos.log
     ports:
       - '9732:9732'
       - '8732:8732'
