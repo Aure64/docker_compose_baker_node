@@ -5,7 +5,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
-      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../config/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -23,8 +23,8 @@ services:
     container_name: grafana
     volumes:
       - grafana-storage:/var/lib/grafana
-      - ./data/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./data/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ../data/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ../data/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     environment:
       GF_SECURITY_ADMIN_PASSWORD: secret  # Change this!
       GF_PATHS_PROVISIONING: "/etc/grafana/provisioning"
@@ -54,9 +54,9 @@ services:
     image: grafana/promtail:latest
     container_name: promtail
     volumes:
-      - ./config/promtail-config.yaml:/etc/promtail/config.yml
+      - ../config/promtail-config.yaml:/etc/promtail/config.yml
       - /var/log:/var/log
-      - ./logs:/var/log/tezos
+      - ../logs:/var/log/tezos
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
@@ -71,15 +71,15 @@ services:
     security_opt:
       - apparmor:unconfined
     volumes:
-      - ./config/netdata/app_groups.conf:/etc/netdata/app_groups.conf:ro
-      - ./config/netdata/filecheck.conf:/etc/netdata/go.d/filecheck.conf:ro
+      - ../config/netdata/app_groups.conf:/etc/netdata/app_groups.conf:ro
+      - ../config/netdata/filecheck.conf:/etc/netdata/go.d/filecheck.conf:ro
       - netdataconfig:/etc/netdata
       - netdatalib:/var/lib/netdata
       - netdatacache:/var/cache/netdata
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /var/log:/host/var/log:ro
-      - ./data/node_data:/host/node_data:ro
+      - ../data/node_data:/host/node_data:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - "19999:19999"
