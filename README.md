@@ -41,7 +41,7 @@ sudo rm -rf ./data/node_data/data/daily_logs ./data/node_data/data/lock ./data/n
 Téléchargez la dernière snapshot de la blockchain Tezos pour Ghostnet.
 
 ```
-wget -O data/snapshot.rolling https://snapshots.tezos.org/ghostnet/rolling
+wget -O ./data/snapshot.rolling https://snapshots.eu.tzinit.org/ghostnet/rolling
 ```
 
 ### Étape 5: Lancer le Conteneur d'Import
@@ -49,7 +49,7 @@ wget -O data/snapshot.rolling https://snapshots.tezos.org/ghostnet/rolling
 Démarrez le processus d'importation de la snapshot dans le volume du nœud Tezos.
 
 ```
-docker compose -f docker-compose/tezos.yml up -d import
+docker compose -f docker-compose/tezos.yml up import
 ```
 
 ### Étape 6: Lancer le Conteneur du Noeud Après l'Importation
