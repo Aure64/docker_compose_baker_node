@@ -23,8 +23,8 @@ services:
     container_name: grafana
     volumes:
       - grafana-storage:/var/lib/grafana
-      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./data/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./data/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     environment:
       GF_SECURITY_ADMIN_PASSWORD: secret  # Change this!
       GF_PATHS_PROVISIONING: "/etc/grafana/provisioning"
@@ -79,7 +79,7 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /var/log:/host/var/log:ro
-      - ./node_data:/host/node_data:ro
+      - ./data/node_data:/host/node_data:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - "19999:19999"

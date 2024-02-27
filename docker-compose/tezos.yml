@@ -11,9 +11,9 @@ services:
     container_name: octez-snapshot-import
     command: octez-snapshot-import
     volumes:
-      - ./node_data:/var/run/tezos/node
-      - ./client_data:/var/run/tezos/client
-      - ./snapshot.rolling:/snapshot
+      - ./data/node_data:/var/run/tezos/node
+      - ./data/client_data:/var/run/tezos/client
+      - ./data/snapshot.rolling:/snapshot
 
 
   node:
@@ -25,8 +25,8 @@ services:
       - '8732:8732'
       - '9091:9091'
     volumes:
-      - ./node_data:/var/run/tezos/node
-      - ./client_data:/var/run/tezos/client
+      - ./data/node_data:/var/run/tezos/node
+      - ./data/client_data:/var/run/tezos/client
       - ./logs:/var/log/tezos
     restart: on-failure
     networks:
@@ -44,8 +44,8 @@ services:
       - PROTOCOL=proxford
     command: octez-baker-Proxford --endpoint http://node_rolling:8732 run with local node /var/run/tezos/node/data --liquidity-baking-toggle-vote pass --log-output /var/log/tezos/baker.log
     volumes:
-      - ./node_data:/var/run/tezos/node:ro
-      - ./client_data:/var/run/tezos/client
+      - ./data/node_data:/var/run/tezos/node:ro
+      - ./data/client_data:/var/run/tezos/client
       - ./logs:/var/log/tezos
     restart: on-failure
     networks:
@@ -61,8 +61,8 @@ services:
      - PROTOCOL=proxford
     command: octez-accuser --endpoint http://node_rolling:8732 --log-output /var/log/tezos/accuser.log
     volumes:
-     - ./node_data:/var/run/tezos/node:ro
-     - ./client_data:/var/run/tezos/client
+     - ./data/node_data:/var/run/tezos/node:ro
+     - ./data/client_data:/var/run/tezos/client
      - ./logs:/var/log/tezos
     restart: on-failure
     networks:
