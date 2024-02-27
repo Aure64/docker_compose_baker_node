@@ -62,3 +62,7 @@ stop:
 clean-docker:
 	@docker volume prune -f
 	@docker image prune -f
+	
+clean-volumes:
+	docker volume rm docker-compose_grafana-storage docker-compose_loki-data docker-compose_netdatacache docker-compose_netdataconfig docker-compose_netdatalib || true
+
