@@ -1,4 +1,3 @@
-
 # README pour le Projet Docker Compose Tezos
 
 Ce README guide à travers les étapes nécessaires pour configurer et lancer un nœud Tezos, importer une snapshot blockchain, et configurer le monitoring avec Prometheus, Grafana, et Netdata.
@@ -8,75 +7,42 @@ Ce README guide à travers les étapes nécessaires pour configurer et lancer un
 - Docker et Docker Compose installés sur votre machine.
 - Accès à une ligne de commande/terminal.
 
-## Configuration et Lancement
+## Configuration
 
-### Étape 1: Lancer le Réseau `app_network`
+Avant de démarrer, configurez votre environnement en modifiant le fichier `.env` pour choisir le réseau (`mainnet`, `ghostnet`, `oxfordnet`, `weeklynet`) et le mode (`full`, `rolling`). Notez que `weeklynet` est uniquement disponible en mode `rolling`.
 
-Créez un réseau Docker qui sera utilisé par tous les conteneurs de ce projet.
+## Lancement
 
-```
-docker network create app_network
-```
+Exécutez les commandes suivantes pour démarrer votre nœud Tezos et le système de monitoring.
 
-### Étape 2: Lancer le Conteneur du Noeud dans Docker Compose Tezos
-
-Démarrez le conteneur du nœud Tezos en utilisant le fichier Docker Compose préparé pour Tezos.
+### Lancer tout avec Make
 
 ```
-docker compose -f docker-compose/tezos.yml up -d node
+make all
 ```
 
-### Étape 3: Stopper le Conteneur et Nettoyer le Dossier `node_data`
+Cette commande effectue les étapes suivantes automatiquement :
 
-Arrêtez le conteneur du nœud Tezos, puis nettoyez les données obsolètes avant d'importer la snapshot.
+1. Crée le réseau Docker si nécessaire.
+2. Lance le conteneur du nœud Tezos.
+3. Nettoie le dossier `node_data`.
+4. Télécharge la snapshot.
+5. Lance le conteneur d'import.
+6. Relance le conteneur du nœud après l'importation.
+7. Démarre le système de monitoring.
 
-```
-docker compose -f docker-compose/tezos.yml stop node
-sudo rm -rf ./data/node_data/data/daily_logs ./data/node_data/data/lock ./data/node_data/data/store ./data/node_data/data/context
+### Arrêter et Nettoyer
 
-```
-
-### Étape 4: Télécharger la Snapshot
-
-Téléchargez la dernière snapshot de la blockchain Tezos pour Ghostnet.
-
-```
-wget -O ./data/snapshot.rolling https://snapshots.eu.tzinit.org/ghostnet/rolling
-```
-
-### Étape 5: Lancer le Conteneur d'Import
-
-Démarrez le processus d'importation de la snapshot dans le volume du nœud Tezos.
+Pour arrêter tous les services et nettoyer les ressources :
 
 ```
-docker compose -f docker-compose/tezos.yml up import
+make stop
 ```
 
-### Étape 6: Lancer le Conteneur du Noeud Après l'Importation
+### Accès aux Interfaces Web
 
-Une fois l'importation terminée (cela peut prendre un certain temps), relancez le conteneur du nœud Tezos.
-
-```
-docker compose -f docker-compose/tezos.yml up -d node
-```
-
-### Étape 7: Lancer le Docker Compose Monitoring
-
-Démarrez les services de monitoring (Prometheus, Grafana, et Netdata).
-
-```
-docker compose -f docker-compose/monitoring.yml up -d
-```
-
-### Étape 8: Tester l'Accès aux Interfaces Web
-
-- **Netdata**: Accédez à Netdata pour voir les statistiques en temps réel de votre nœud.
-    - URL: http://localhost:19999/
-- **Grafana**: Ouvrez Grafana pour visualiser les dashboards de monitoring.
-    - URL: http://localhost:3000/
-    - Utilisateur par défaut: admin
-    - Mot de passe par défaut: admin (ou celui que vous avez défini dans `docker-compose/monitoring.yml`)
-- **Prometheus**: Accédez à l'interface web de Prometheus pour explorer les métriques collectées.
-    - URL: http://localhost:9090/
+- **Netdata**: http://localhost:19999/
+- **Grafana**: http://localhost:3000/ (admin/admin)
+- **Prometheus**: http://localhost:9090/
 
 Suivez ces étapes pour configurer et lancer votre environnement de nœud Tezos avec un système de monitoring complet.
