@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   prometheus:
@@ -7,16 +7,15 @@ services:
     volumes:
       - ../config/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.enable-lifecycle'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
     ports:
       - "9090:9090"
     networks:
       app_network:
         aliases:
           - prometheus
-
 
   grafana:
     image: grafana/grafana:latest
@@ -26,7 +25,7 @@ services:
       - ../data/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
       - ../data/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: secret  # Change this!
+      GF_SECURITY_ADMIN_PASSWORD: secret # Change this!
       GF_PATHS_PROVISIONING: "/etc/grafana/provisioning"
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
@@ -85,6 +84,7 @@ services:
       - "19999:19999"
     networks:
       - app_network
+
 volumes:
   grafana-storage: {}
   netdataconfig: {}
