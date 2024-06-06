@@ -30,7 +30,7 @@ find-ports:
 	current_port=$$start_port; \
 	while [ $$current_port -le $$end_port ]; do \
 		if ! lsof -i :$$current_port >/dev/null; then \
-			echo $$current_port > .port; \
+			echo $$current_port > .port_$(NODE_NAME); \
 			exit 0; \
 		fi; \
 		current_port=$$((current_port+1)); \
@@ -44,11 +44,11 @@ setup-grafana-dashboard:
 
 # Launch the Tezos node container
 launch-node:
-	@NODE_NAME=$(NODE_NAME) PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) up -d node
+	@PORT=$(shell cat .port_$(NODE_NAME)) NODE_NAME=$(NODE_NAME) $(DOCKER_COMPOSE_TEZOS) up -d node
 
 # Clean node data
 clean-node-data:
-	@NODE_NAME=$(NODE_NAME) PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) stop node
+	@PORT=$(shell cat .port_$(NODE_NAME)) NODE_NAME=$(NODE_NAME) $(DOCKER_COMPOSE_TEZOS) stop node
 	@sudo rm -rf ./data/node_data_$(NODE_NAME)/data/daily_logs ./data/node_data_$(NODE_NAME)/data/lock ./data/node_data_$(NODE_NAME)/data/store ./data/node_data_$(NODE_NAME)/data/context
 
 # Download the latest snapshot
@@ -62,13 +62,13 @@ clean-data-dir:
 
 # Import the snapshot
 import-snapshot: clean-data-dir
-	@NODE_NAME=$(NODE_NAME) PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) up import
+	@PORT=$(shell cat .port_$(NODE_NAME)) NODE_NAME=$(NODE_NAME) $(DOCKER_COMPOSE_TEZOS) up import
 	@echo "Removing the snapshot file to save space."
 	@rm -f $(SNAPSHOT_FILE)
 
 # Relaunch the node after importing the snapshot
 launch-node-after-import:
-	@NODE_NAME=$(NODE_NAME) PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) up -d node
+	@PORT=$(shell cat .port_$(NODE_NAME)) NODE_NAME=$(NODE_NAME) $(DOCKER_COMPOSE_TEZOS) up -d node
 
 # Launch monitoring services
 launch-monitoring:
@@ -76,7 +76,7 @@ launch-monitoring:
 
 # Stop and clean up resources
 stop:
-	@NODE_NAME=$(NODE_NAME) PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) down
+	@PORT=$(shell cat .port_$(NODE_NAME)) NODE_NAME=$(NODE_NAME) $(DOCKER_COMPOSE_TEZOS) down
 	@$(DOCKER_COMPOSE_MONITORING) down
 	@docker network rm $(NETWORK_NAME) || true
 	@echo "All resources have been cleaned up."
