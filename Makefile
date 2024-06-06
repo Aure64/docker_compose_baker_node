@@ -1,4 +1,4 @@
-.PHONY: all create-network pull-images find-ports launch-node clean-node-data download-snapshot import-snapshot launch-node-after-import launch-monitoring setup-grafana-dashboard stop clean-volumes clean-images clean-docker
+.PHONY: all create-network pull-images find-ports setup-grafana-dashboard launch-node clean-node-data download-snapshot import-snapshot launch-node-after-import launch-monitoring stop clean-docker
 
 # Docker network name
 NETWORK_NAME=app_network
@@ -6,11 +6,6 @@ NETWORK_NAME=app_network
 # Include environment variables from the .env file
 include .env
 export
-
-# Dynamically build the snapshot URL based on TEZOS_NETWORK and TEZOS_HISTORY_MODE environment variables
-SNAPSHOT_BASE_URL=https://snapshots.eu.tzinit.org
-SNAPSHOT_URL=$(SNAPSHOT_BASE_URL)/$(TEZOS_NETWORK)/$(TEZOS_HISTORY_MODE)
-SNAPSHOT_FILE=./data/snapshot.rolling
 
 # Define variables for docker-compose commands to simplify modifications
 DOCKER_COMPOSE_TEZOS=docker compose -f docker-compose/tezos.yml 
@@ -49,12 +44,12 @@ setup-grafana-dashboard:
 
 # Launch the Tezos node container
 launch-node:
-	@PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) up -d node
+	@NODE_NAME=$(NODE_NAME) PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) up -d node
 
 # Clean node data
 clean-node-data:
-	@PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) stop node
-	@sudo rm -rf ./data/node_data/data/daily_logs ./data/node_data/data/lock ./data/node_data/data/store ./data/node_data/data/context
+	@NODE_NAME=$(NODE_NAME) PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) stop node
+	@sudo rm -rf ./data/node_data_$(NODE_NAME)/data/daily_logs ./data/node_data_$(NODE_NAME)/data/lock ./data/node_data_$(NODE_NAME)/data/store ./data/node_data_$(NODE_NAME)/data/context
 
 # Download the latest snapshot
 download-snapshot:
@@ -63,17 +58,17 @@ download-snapshot:
 
 # Clean data directory before importing the snapshot
 clean-data-dir:
-	@sudo rm -rf ./data/node_data/data/lock ./data/node_data/data/context ./data/node_data/data/daily_logs ./data/node_data/data/store ./data/node_data/data/protocol
+	@sudo rm -rf ./data/node_data_$(NODE_NAME)/data/lock ./data/node_data_$(NODE_NAME)/data/context ./data/node_data_$(NODE_NAME)/data/daily_logs ./data/node_data_$(NODE_NAME)/data/store ./data/node_data_$(NODE_NAME)/data/protocol
 
 # Import the snapshot
 import-snapshot: clean-data-dir
-	@PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) up import
+	@NODE_NAME=$(NODE_NAME) PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) up import
 	@echo "Removing the snapshot file to save space."
 	@rm -f $(SNAPSHOT_FILE)
 
 # Relaunch the node after importing the snapshot
 launch-node-after-import:
-	@PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) up -d node
+	@NODE_NAME=$(NODE_NAME) PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) up -d node
 
 # Launch monitoring services
 launch-monitoring:
@@ -81,7 +76,7 @@ launch-monitoring:
 
 # Stop and clean up resources
 stop:
-	@PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) down
+	@NODE_NAME=$(NODE_NAME) PORT=$(shell cat .port) $(DOCKER_COMPOSE_TEZOS) down
 	@$(DOCKER_COMPOSE_MONITORING) down
 	@docker network rm $(NETWORK_NAME) || true
 	@echo "All resources have been cleaned up."

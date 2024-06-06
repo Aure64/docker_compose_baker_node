@@ -1,1 +1,3 @@
 snapshot.rolling
+data/grafana/provisioning/dashboards/dashboard.json
+.port

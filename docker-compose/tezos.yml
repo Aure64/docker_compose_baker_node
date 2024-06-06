@@ -7,15 +7,17 @@ networks:
 services:
   import:
     image: tezos/tezos:latest
-    container_name: octez-snapshot-import
+    container_name: ${NODE_NAME}-snapshot-import
     command: octez-snapshot-import
     volumes:
-      - ../data/node_data:/var/run/tezos/node
-      - ../data/client_data:/var/run/tezos/client
+      - ../data/node_data_${NODE_NAME}:/var/run/tezos/node
+      - ../data/client_data_${NODE_NAME}:/var/run/tezos/client
       - ../data/snapshot.rolling:/snapshot
+    networks:
+      - app_network
 
   node:
-    container_name: ${TEZOS_NETWORK}-public-node
+    container_name: ${NODE_NAME}-public-node
     image: tezos/tezos:latest
     command: octez-node --network=${TEZOS_NETWORK} --net-addr :9732 --rpc-addr 0.0.0.0:${PORT} --allow-all-rpc 0.0.0.0:${PORT} --history-mode=${TEZOS_HISTORY_MODE} --metrics-addr=0.0.0.0:9091 --log-output /var/log/tezos/tezos.log
     ports:
@@ -23,42 +25,42 @@ services:
       - "${PORT}:${PORT}"
       - "9091:9091"
     volumes:
-      - ../data/node_data:/var/run/tezos/node
-      - ../data/client_data:/var/run/tezos/client
+      - ../data/node_data_${NODE_NAME}:/var/run/tezos/node
+      - ../data/client_data_${NODE_NAME}:/var/run/tezos/client
       - ../logs:/var/log/tezos
     restart: on-failure
     networks:
       - app_network
 
   baker:
-    container_name: ${TEZOS_NETWORK}-baker
+    container_name: ${NODE_NAME}-baker
     image: tezos/tezos-bare:master
     environment:
       - HOME=/tmp
-      - NODE_HOST=${TEZOS_NETWORK}-public-node
+      - NODE_HOST=${NODE_NAME}-public-node
       - NODE_RPC_PORT=${PORT}
       - PROTOCOL=proxford
-    command: octez-baker-Proxford --endpoint http://${TEZOS_NETWORK}-public-node:${PORT} run with local node /var/run/tezos/node/data --liquidity-baking-toggle-vote pass --log-output /var/log/tezos/baker.log
+    command: octez-baker-Proxford --endpoint http://${NODE_NAME}-public-node:${PORT} run with local node /var/run/tezos/node/data --liquidity-baking-toggle-vote pass --log-output /var/log/tezos/baker.log
     volumes:
-      - ../data/node_data:/var/run/tezos/node:ro
-      - ../data/client_data:/var/run/tezos/client
+      - ../data/node_data_${NODE_NAME}:/var/run/tezos/node:ro
+      - ../data/client_data_${NODE_NAME}:/var/run/tezos/client
       - ../logs:/var/log/tezos
     restart: on-failure
     networks:
       - app_network
 
   accuser:
-    container_name: ${TEZOS_NETWORK}-accuser
+    container_name: ${NODE_NAME}-accuser
     image: tezos/tezos:latest
     environment:
       - HOME=/tmp
-      - NODE_HOST=${TEZOS_NETWORK}-public-node
+      - NODE_HOST=${NODE_NAME}-public-node
       - NODE_RPC_PORT=${PORT}
       - PROTOCOL=proxford
-    command: octez-accuser --endpoint http://${TEZOS_NETWORK}-public-node:${PORT} --log-output /var/log/tezos/accuser.log
+    command: octez-accuser --endpoint http://${NODE_NAME}-public-node:${PORT} --log-output /var/log/tezos/accuser.log
     volumes:
-      - ../data/node_data:/var/run/tezos/node:ro
-      - ../data/client_data:/var/run/tezos/client
+      - ../data/node_data_${NODE_NAME}:/var/run/tezos/node:ro
+      - ../data/client_data_${NODE_NAME}:/var/run/tezos/client
       - ../logs:/var/log/tezos
     restart: on-failure
     networks:
