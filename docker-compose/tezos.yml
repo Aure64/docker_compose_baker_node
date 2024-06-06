@@ -7,14 +7,12 @@ networks:
 services:
   import:
     image: tezos/tezos:latest
-    container_name: ${TEZOS_NETWORK}-snapshot-import
-    command: octez-node snapshot import --data-dir /var/run/tezos/node --file /snapshot
+    container_name: octez-snapshot-import
+    command: octez-snapshot-import
     volumes:
       - ../data/node_data:/var/run/tezos/node
       - ../data/client_data:/var/run/tezos/client
       - ../data/snapshot.rolling:/snapshot
-    networks:
-      - app_network
 
   node:
     container_name: ${TEZOS_NETWORK}-public-node
